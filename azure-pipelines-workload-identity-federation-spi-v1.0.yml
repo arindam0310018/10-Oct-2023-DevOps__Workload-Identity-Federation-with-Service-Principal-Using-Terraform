@@ -5,12 +5,6 @@ trigger:
 #DECLARE PARAMETERS:-
 ######################
 parameters:
-# - name: SubscriptionID
-#   displayName: Subscription ID Details Follow Below:-
-#   default: 210e66cb-55cf-424e-8daa-6cad804ab604
-#   values:
-#   -  210e66cb-55cf-424e-8daa-6cad804ab604
-
 - name: ServiceConnection
   displayName: Service Connection Name Follows Below:-
   default: amcloud-cicd-service-connection
