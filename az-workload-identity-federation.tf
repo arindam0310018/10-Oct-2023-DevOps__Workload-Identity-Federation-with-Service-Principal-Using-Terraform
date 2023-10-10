@@ -6,10 +6,6 @@ data "azuredevops_project" "az-devops-project" {
   name  = var.devops-proj-name
 }
 
-# output "project_id" {
-#   value = data.azuredevops_projects.az-devops-project.projects.*.project_id
-# }
-
 #############################################
 ## App Registration and Service Principal:-
 #############################################
@@ -35,8 +31,12 @@ resource "azuread_application_federated_identity_credential" "aad-app-federated"
   subject               = azuredevops_serviceendpoint_azurerm.az-devops-serviceendpoint.workload_identity_federation_subject
 }
 
+#################################################################
+## App Registration Federated Credentials Service Connections:-
+#################################################################
+
 resource "azuredevops_serviceendpoint_azurerm" "az-devops-serviceendpoint" {
-  project_id                             = data.azuredevops_project.az-devops-project.project_id #"d868d9ec-e5d3-4df0-a1ff-f7e2c686e6c7"
+  project_id                             = data.azuredevops_project.az-devops-project.project_id
   service_endpoint_name                  = var.app-name
   description                            = "Service Connection Managed by Terraform"
   service_endpoint_authentication_scheme = "WorkloadIdentityFederation"
