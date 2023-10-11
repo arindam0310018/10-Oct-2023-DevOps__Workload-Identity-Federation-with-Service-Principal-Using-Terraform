@@ -6,6 +6,14 @@ data "azuredevops_project" "az-devops-project" {
   name  = var.devops-proj-name
 }
 
+# data "azurerm_subscription" "current" {
+# }
+
+data "azurerm_storage_account" "az-sa" {
+  name                = var.sa-name
+  resource_group_name = var.rg-name
+}
+
 #############################################
 ## App Registration and Service Principal:-
 #############################################
@@ -31,10 +39,9 @@ resource "azuread_application_federated_identity_credential" "aad-app-federated"
   subject               = azuredevops_serviceendpoint_azurerm.az-devops-serviceendpoint.workload_identity_federation_subject
 }
 
-#################################################################
-## App Registration Federated Credentials Service Connections:-
-#################################################################
-
+########################################
+## Service Connection in Azure Devops:-
+########################################
 resource "azuredevops_serviceendpoint_azurerm" "az-devops-serviceendpoint" {
   project_id                             = data.azuredevops_project.az-devops-project.project_id
   service_endpoint_name                  = var.app-name
@@ -46,4 +53,36 @@ resource "azuredevops_serviceendpoint_azurerm" "az-devops-serviceendpoint" {
   azurerm_spn_tenantid      = var.tenantID
   azurerm_subscription_id   = var.subsID 
   azurerm_subscription_name = var.subsName
+}
+
+#####################################
+## Grant Access to all Pipelines:-
+####################################
+resource "azuredevops_resource_authorization" "az-devops-serviceendpoint-auth" {
+  project_id  = data.azuredevops_project.az-devops-project.project_id
+  resource_id = azuredevops_serviceendpoint_azurerm.az-devops-serviceendpoint.id
+  authorized  = true
+}
+
+############################################################
+## Role Based Access Control (RBAC):-
+## Subscription = Contributor, User Access Administrator
+## Storage Account = Storage Blob Data Contributor
+############################################################
+
+resource "azurerm_role_assignment" "az-rbac-subs-contrib" {
+  scope                = "/subscriptions/${var.subsID}/"
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.aad-app-sp.object_id
+}
+
+resource "azurerm_role_assignment" "az-rbac-subs-usraccessadmin" {
+  scope                = "/subscriptions/${var.subsID}/"
+  role_definition_name = "User Access Administrator"
+  principal_id         = azuread_service_principal.aad-app-sp.object_id
+}
+resource "azurerm_role_assignment" "az-rbac-sa-blobcontrib" {
+  scope                = data.azurerm_storage_account.az-sa.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azuread_service_principal.aad-app-sp.object_id
 }

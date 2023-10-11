@@ -3,6 +3,15 @@ variable "devops-proj-name" {
   description = "Name of the Devops Project."
 }
 
+variable "sa-name" {
+  type        = string
+  description = "Name of the Storage Account."
+}
+
+variable "rg-name" {
+  type        = string
+  description = "Name of the Resource Group."
+}
 variable "app-name" {
   type        = string
   description = "Name of the App Registration."
